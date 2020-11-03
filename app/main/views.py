@@ -10,7 +10,9 @@ from ..models import Permission, Role, User, Post, Comment
 from ..decorators import admin_required, permission_required
 
 import pymysql
-
+import requests
+import datetime
+import calendar
 
 conn = pymysql.connect(
     host='127.0.0.1',
@@ -304,3 +306,59 @@ def SearchMysql():
     labels = cur.fetchall()
     labels = [l[0] for l in labels]
     return render_template('SearchMysql.html', labels=labels, content=content)
+
+@main.route('/cf')
+def GetCf():
+    # 剪切函数
+    def cut(strings, starts, ends):
+        str = strings.split(starts)
+        strs = str[1].split(ends)
+        return strs[0]
+
+    cf_home_url = "https://confluence.inceptio.tech/"
+    cf_page_url = cf_home_url + "admin/license.action"
+
+    login_data = {
+        "os_username": "taishan.yuan",
+        "os_password": "Nuy30059",
+        "login": "登录",
+        "os_destination": "",
+    }
+
+    # 登录
+    loginreqsession = requests.session()
+    logincontent = loginreqsession.post(cf_home_url, login_data).content.decode("utf-8")
+
+    # 访问页面
+    page_html_text = loginreqsession.get(cf_page_url).content.decode("utf-8")
+    # print(page_html_text)
+
+    ExpiresDate = cut(page_html_text, 'Your evaluation expires on <b>', '</b>')
+
+    print(ExpiresDate)
+
+    # ExpiresDate = 'Nov 14, 2020 05:00'
+
+    month = ExpiresDate[0:3]
+    # print(mon)
+
+    monthNum = str(list(calendar.month_abbr).index(month))
+
+    # print(monthNum)
+
+    expdate = ExpiresDate[8:12] + '-' + monthNum + '-' + ExpiresDate[4:6] + ' ' + ExpiresDate[13:18]
+    # print(expdate)
+
+    expdateNum = datetime.datetime.strptime(expdate, "%Y-%m-%d %H:%M")
+    # print(expdate,type(expdate))
+
+    now = datetime.datetime.now()
+    # print(now,type(now))
+
+    AvailableDay = expdateNum - now
+
+    print("ExpireDate is : " + expdate)
+    print("Available Time:")
+    print(AvailableDay)
+
+    return render_template('getCf.html',expdate=expdate,AvailableDay=AvailableDay)

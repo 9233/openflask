@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}DevOps{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Inceptio Jira & Confluence</h1>
+</div>
+
+
+<div>
+    <h5> ExpireDate is : </h5>  <h3>{{ expdate }}</h3>
+</br>
+    </br>
+    <h5> Available Time: </h5>  <h3>{{ AvailableDay }}</h3>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
